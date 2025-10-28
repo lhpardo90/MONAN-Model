@@ -4356,6 +4356,22 @@ module init_atm_cases
          call mpas_log_write('Setting SST from SKINTEMP')
          !where (landmask == 0) sst = skintemp
          sst = skintemp
+         do iCell=1,nCells
+            !PK "land-ocean mask (1=land ; 0=ocean)"
+            if (landmask(iCell) == 1) then
+               if (skintemp(iCell) <= 0.0) then
+                  sst (iCell)     = st_fg(1,iCell)
+                  skintemp(iCell) = st_fg(1,iCell)
+               endif
+            !PK "land-ocean mask (1=land ; 0=ocean)"
+            elseif (landmask(iCell) == 0) then
+               do k = 1, config_nfgsoillevels
+                  if (st_fg(k,iCell) <= 0.0) then
+                      st_fg(k,iCell) = sst(iCell)
+                  endif
+               end do
+            end if
+         end do
       end if
 
       ! Set SNOWC (snow-cover flag) based on SNOW
