@@ -109,7 +109,8 @@ module module_cu_gf_monan
       ,add_coldpool_clos,add_coldpool_trig,mx_buoy1, mx_buoy2, cum_t_star&
       ,add_coldpool_diff,n_cldrop,use_gustiness, use_random_num          &
       ,dcape_threshold,modConvParGF_initialized,use_pass_cloudvol        &
-      ,use_lcl_ctrl_entr,use_rhu_ctrl_entr,cum_min_cloud_depth,use_sub3d 
+      ,use_lcl_ctrl_entr,use_rhu_ctrl_entr,cum_min_cloud_depth,use_sub3d &
+      ,Nc_mult_land,Nc_mult_ocean
 
    public convParGFDriver,makeDropletNumber,makeIceNumber,FractLiqF      &
       ,coldPoolStart,readGFConvParNML,initModConvParGF,cu_gf_monan_driver&
@@ -281,6 +282,8 @@ module module_cu_gf_monan
    integer :: liq_ice_number_conc   != include drop/ice number mixing ratio convective tendencies
    real    :: sig_factor            != exponential factor for the sigma determination (orig = 0.1)
    real    :: N_cldrop              != cloud drop number concentration (cm\u02c6-3)
+   real    :: Nc_mult_ocean         != multiplication factor to increase Nc relative to n_cldrop over oceans
+   real    :: Nc_mult_land          != multiplication factor to increase Nc relative to n_cldrop over land
 
    integer :: use_sub3d             !=0,1,2 : > 0 activates the 3d subsidence lateral spreading
 
@@ -4533,7 +4536,8 @@ contains
 
               !NC=300.e+6 over the land, NC=50.e+6 over the oceans
                Nc = n_cldrop *1.e+6 
-               Nc = Nc*xland(i) + 3.*Nc*(1.0-xland(i))
+               !Nc = Nc*xland(i) + 3.*Nc*(1.0-xland(i))
+               Nc = Nc * (Nc_mult_ocean*xland(i) + Nc_mult_land*(1.0-xland(i)))
                min_liq  = 4./3.*c_pi*rhowater*r0**3*Nc/rhoair0  ! 0.419e-3 -- .61e-3
               
                if(clw_all(k,i) <= min_liq) then !=> more heating at upper levels, more detrained ice
@@ -7362,7 +7366,7 @@ contains
          ,use_memory, add_coldpool_prop ,mx_buoy1, mx_buoy2,max_tq_tend           &
          ,add_coldpool_clos,add_coldpool_trig,add_coldpool_diff,n_cldrop          &
          ,output_sound,use_pass_cloudvol,use_lcl_ctrl_entr,use_rhu_ctrl_entr      &
-         ,cum_min_cloud_depth,use_sub3d
+         ,cum_min_cloud_depth,use_sub3d,Nc_mult_land,Nc_mult_ocean
 
       if(present(IO_NODE)) then 
          local_io_node = IO_NODE
@@ -7482,6 +7486,8 @@ contains
          print*, 'c0_shal            ' , real(c0_shal            ,4)
          print*, 'qrc_crit           ' , real(qrc_crit           ,4)
          print*, 'n_cldrop           ' , real(n_cldrop           ,4)
+         print*, 'Nc_mult_land       ' , real(Nc_mult_land       ,4)
+         print*, 'Nc_mult_ocean      ' , real(Nc_mult_ocean      ,4)
 
          print*, '!--- for momentum transport'
          print*, 'use_momentum_trans ' , use_momentum_transp
@@ -10034,6 +10040,8 @@ contains
       c0_shal           = 1.e-3    
       qrc_crit          = 1.e-5 
       n_cldrop          = 200.0  
+      Nc_mult_land      = 3.
+      Nc_mult_ocean     = 1.
 
       use_momentum_transp = 1   
       lambau_deep       = 0.0 
