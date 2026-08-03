@@ -4355,15 +4355,30 @@ module module_cu_gf_monan
             
             icount = icount + 1
             if(cumulus == 'deep') var2d1(i) = icount
-            !--- use this for just 'icount = 3' searches (original k22)
+            !
             !if(cap_max(i) < depth_neg_buoy(i) .and. icount > 10) then
-            if(cap_max(i) < depth_neg_buoy(i) .and. buoy_exc(kbcon(i),i) < mx_buoy1) then
-                          ierr(i)=30 ; is_removed = remove(vec_ok, i)
-                          ierrc(i)="could not find reasonable kbcon in cup_cloud_limits"
-                          cycle loop0
-            endif
+            !               ierr(i)=30 ; is_removed = remove(vec_ok, i)
+            !               ierrc(i)="could not find reasonable kbcon in cup_cloud_limits"
+            !               cycle loop0
+            !endif
             !---
+            if(convection_tracer == 1) then
+                  if(cap_max(i) < depth_neg_buoy(i) .and. buoy_exc(kbcon(i),i) < mx_buoy1) then
+                        ierr(i)=30 ; is_removed = remove(vec_ok, i)
+                        ierrc(i)="could not find reasonable kbcon in cup_cloud_limits"
+                        cycle loop0
+                  endif
 
+            else
+
+                  if(cap_max(i) < depth_neg_buoy(i) .and. icount > 10) then
+                        ierr(i)=30 ; is_removed = remove(vec_ok, i)
+                        ierrc(i)="could not find reasonable kbcon in cup_cloud_limits"
+                        cycle loop0
+                  endif
+            endif
+            !
+            !
             !- if am here -> kbcon not found for air parcels from k22 level
             k22(i)=k22(i)+1
             !--- increase capmax
