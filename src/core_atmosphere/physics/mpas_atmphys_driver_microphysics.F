@@ -579,7 +579,7 @@
  integer,dimension(:),pointer:: i_rainnc
 
  real(kind=RKIND),pointer:: config_bucket_rainnc
- real(kind=RKIND),dimension(:),pointer:: precipw, precipci,precipcloud,precipice,precipgraupel,precipsnow
+ real(kind=RKIND),dimension(:),pointer:: precipw, precipc,precipr,precipi,precipg,precips
  real(kind=RKIND),dimension(:),pointer:: graupelnc,rainnc,snownc
  real(kind=RKIND),dimension(:),pointer:: graupelncv,rainncv,snowncv,sr
 
@@ -594,6 +594,11 @@
 
  call mpas_pool_get_array(diag_physics,'i_rainnc'  ,i_rainnc  )
  call mpas_pool_get_array(diag_physics,'precipw'   ,precipw   )
+ call mpas_pool_get_array(diag_physics,'precipc'   ,precipc   )
+ call mpas_pool_get_array(diag_physics,'precipr'   ,precipr   )
+ call mpas_pool_get_array(diag_physics,'precipi'   ,precipi   )
+ call mpas_pool_get_array(diag_physics,'precipg'   ,precipg   )
+ call mpas_pool_get_array(diag_physics,'precips'   ,precips   )
  call mpas_pool_get_array(diag_physics,'graupelnc' ,graupelnc )
  call mpas_pool_get_array(diag_physics,'graupelncv',graupelncv)
  call mpas_pool_get_array(diag_physics,'rainnc'    ,rainnc    )
@@ -604,6 +609,11 @@
 
  do i = its,ite
     precipw(i) = 0._RKIND
+    precipc(i) = 0._RKIND
+    precipr(i) = 0._RKIND
+    precipi(i) = 0._RKIND
+    precipg(i) = 0._RKIND
+    precips(i) = 0._RKIND
  enddo
 
 !variables common to all cloud microphysics schemes:
@@ -652,11 +662,11 @@
 
           do k = kts,kte
               rho_a = rho_p(i,k,j) / (1._RKIND + qv_p(i,k,j))
-              precipci(i) = precipci(i) + (qc_p(i,k,j) + qi_p(i,k,j)) * rho_a * dz_p(i,k,j)
-              precipcloud(i) = precipcloud(i) + qc_p(i,k,j) * rho_a * dz_p(i,k,j)
-              precipice(i) = precipice(i) + qi_p(i,k,j) * rho_a * dz_p(i,k,j)
-              precipgraupel(i) = precipgraupel(i) + qg_p(i,k,j) * rho_a * dz_p(i,k,j)
-              precipsnow(i) = precipsnow(i) + qs_p(i,k,j) * rho_a * dz_p(i,k,j)
+              precipc(i) = precipc(i) + qc_p(i,k,j) * rho_a * dz_p(i,k,j)
+              precipr(i) = precipr(i) + qr_p(i,k,j) * rho_a * dz_p(i,k,j)
+              precipi(i) = precipi(i) + qi_p(i,k,j) * rho_a * dz_p(i,k,j)
+              precipg(i) = precipg(i) + qg_p(i,k,j) * rho_a * dz_p(i,k,j)
+              precips(i) = precips(i) + qs_p(i,k,j) * rho_a * dz_p(i,k,j)
           enddo
        enddo
        enddo
